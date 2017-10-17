@@ -5,10 +5,7 @@ import org.bttf.botlogger.model.OrderState;
 import org.eclipse.collections.impl.factory.Lists;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,6 +19,7 @@ public class BotloggerController {
 
     @PutMapping("/order/log")
     @ResponseBody
+    @CrossOrigin
     public void logConversationId(@RequestBody OrderLogEntry orderLogEntry){
         this.lastOrderEntry = orderLogEntry;
         if (isOrderCompleted(orderLogEntry)){
@@ -38,11 +36,13 @@ public class BotloggerController {
 
     @GetMapping("/order/last")
     @ResponseBody
+    @CrossOrigin
     public OrderLogEntry getLastOrderLogEntry(){
         return lastOrderEntry;
     }
 
     @GetMapping("/reset")
+    @CrossOrigin
     public void reset(){
         lastOrderEntry = null;
         completedOrders.clear();
@@ -50,6 +50,7 @@ public class BotloggerController {
 
     @GetMapping("/orders")
     @ResponseBody
+    @CrossOrigin
     public List<OrderState> getOrders(){
         return completedOrders;
     }
