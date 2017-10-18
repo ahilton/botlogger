@@ -32,6 +32,9 @@ public class BotloggerApplication {
 		order.setQty(qty);
 		order.setStock(stock);
 		OrderLogEntry logEntry = new OrderLogEntry();
+		logEntry.setLastUserMessage("I want to do something");
+		logEntry.setLastSystemMessage("What stock do you want to sell?");
+		logEntry.setChannel("AlexChannel");
 		logEntry.setLastOrderState(order);
 		controller.logOrderEntry(logEntry);
 	}
