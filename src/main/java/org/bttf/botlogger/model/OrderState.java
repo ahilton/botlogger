@@ -19,4 +19,5 @@ public class OrderState {
     public Long qty;
     public String direction;
     public Boolean completed;
+    public Double price;
 }

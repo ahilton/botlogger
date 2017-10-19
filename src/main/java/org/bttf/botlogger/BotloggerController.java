@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @Service
@@ -63,6 +64,19 @@ public class BotloggerController {
                 .sum();
     }
 
+    @GetMapping("/holdings")
+    @ResponseBody
+    @CrossOrigin
+    public Map<String, Long> getStockHoldings() {
+        MutableList<OrderState> filledOrders = Lists.mutable.ofAll(completedOrders);
+        return filledOrders
+                .aggregateBy(
+                        OrderState::getStock, // aggregation key
+                        () -> 0L, // initial value
+                        (l, o) -> l+OrderUtil.getQtyWithDirection(o) // summing function
+                );
+    }
+
     /*
      *  UTILITY
      *
@@ -82,9 +96,9 @@ public class BotloggerController {
     }
 
     private void handleCompletedOrder(OrderLogEntry orderLogEntry) {
-        /*
-            TODO:: Accommodate order price
-         */
+//        Double price = (new Random().nextDouble() + 0.1) * 100d;
+//        OrderState completedOrder = orderLogEntry.getLastOrderState();
+//        completedOrder.setPrice(price);
         completedOrders.add(orderLogEntry.getLastOrderState());
     }
 }
