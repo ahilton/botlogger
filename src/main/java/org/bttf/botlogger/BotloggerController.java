@@ -1,5 +1,6 @@
 package org.bttf.botlogger;
 
+import jdk.nashorn.internal.ir.debug.JSONWriter;
 import org.bttf.botlogger.model.OrderLogEntry;
 import org.bttf.botlogger.model.OrderState;
 import org.bttf.botlogger.util.OrderUtil;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
 
@@ -57,12 +59,40 @@ public class BotloggerController {
     @CrossOrigin
     public Long getHoldingForStock(@RequestBody String stock) {
         MutableList<OrderState> filledOrders = Lists.mutable.ofAll(completedOrders);
+        String stock2 = stock.substring(1,stock.length()-1).toLowerCase();
+
         return filledOrders
                 .asLazy()
-                .select(o->o.getStock().toLowerCase().equals(stock.toLowerCase()))
+                .select(o->o.getStock().toLowerCase().equals(stock2))
                 .collectLong(OrderUtil::getQtyWithDirection)
                 .sum();
     }
+
+ /*   @GetMapping("/stock/holding")
+    @ResponseBody
+    @CrossOrigin
+    public String[] getHoldingForStock(@RequestBody String stock) {
+        MutableList<OrderState> filledOrders = Lists.mutable.ofAll(completedOrders);
+        String stock2 = stock.substring(1,stock.length()-1).toLowerCase();
+        String[] values = new String[3];
+        long qty= filledOrders
+                .asLazy()
+                .select(o->o.getStock().toLowerCase().equals(stock2))
+                .collectLong(OrderUtil::getQtyWithDirection)
+                .sum();
+
+        double totalPrice = filledOrders
+                .asLazy()
+                .select(o->o.getStock().toLowerCase().equals(stock2))
+                .collectDouble(OrderUtil::getPrice)
+                .sum();
+
+        double avgPrice = totalPrice * qty;
+        values[0]=Long.toString(qty);
+        values[1]=Double.toString(totalPrice);
+        values[2]=Double.toString(avgPrice);
+        return values;
+    }*/
 
     @GetMapping("/holdings")
     @ResponseBody

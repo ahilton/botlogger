@@ -11,4 +11,8 @@ public class OrderUtil {
     public static Long getDirectionSign(OrderState order){
         return order.getDirection().toLowerCase().equals("sell")?-1L:1L;
     }
+
+    public static Double getPrice(OrderState order){
+        return order.getPrice();
+    }
 }
