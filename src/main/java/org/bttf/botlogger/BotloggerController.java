@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Array;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +55,7 @@ public class BotloggerController {
         return completedOrders;
     }
 
-    @GetMapping("/stock/holding")
+   /* @GetMapping("/stock/holding")
     @ResponseBody
     @CrossOrigin
     public Long getHoldingForStock(@RequestBody String stock) {
@@ -66,33 +67,39 @@ public class BotloggerController {
                 .select(o->o.getStock().toLowerCase().equals(stock2))
                 .collectLong(OrderUtil::getQtyWithDirection)
                 .sum();
-    }
+    }*/
 
- /*   @GetMapping("/stock/holding")
+    @GetMapping("/stock/holding")
     @ResponseBody
     @CrossOrigin
-    public String[] getHoldingForStock(@RequestBody String stock) {
+    public Map<String, String> getHoldingForStock(@RequestBody String stock) {
         MutableList<OrderState> filledOrders = Lists.mutable.ofAll(completedOrders);
         String stock2 = stock.substring(1,stock.length()-1).toLowerCase();
-        String[] values = new String[3];
-        long qty= filledOrders
-                .asLazy()
-                .select(o->o.getStock().toLowerCase().equals(stock2))
-                .collectLong(OrderUtil::getQtyWithDirection)
-                .sum();
+        Map<String,String> values = new HashMap<String,String>();
 
-        double totalPrice = filledOrders
-                .asLazy()
-                .select(o->o.getStock().toLowerCase().equals(stock2))
-                .collectDouble(OrderUtil::getPrice)
-                .sum();
+        long noOfOrders = 0;
+        long qty = 0;
+        double accumlativePrice = 0.0;
+        for (OrderState o: filledOrders){
+            if(o.stock.equalsIgnoreCase(stock2)){
+                noOfOrders++;
+                qty = qty + OrderUtil.getQtyWithDirection(o);
+                accumlativePrice = accumlativePrice + OrderUtil.getPrice(o);
+            }
+        }
 
-        double avgPrice = totalPrice * qty;
-        values[0]=Long.toString(qty);
-        values[1]=Double.toString(totalPrice);
-        values[2]=Double.toString(avgPrice);
+        if (noOfOrders == 0){
+            return values;
+        }
+
+        double avgPrice = accumlativePrice / noOfOrders;
+        double totalPrice = qty * avgPrice;
+
+        values.put("qty",Long.toString(qty));
+        values.put("avgPrice", Double.toString(avgPrice));
+        values.put("totalPrice", Double.toString(totalPrice));
         return values;
-    }*/
+    }
 
     @GetMapping("/holdings")
     @ResponseBody

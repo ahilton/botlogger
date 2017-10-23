@@ -20,16 +20,17 @@ public class BotloggerApplication {
 
 	@PostConstruct
 	public void initTestOrders(){
-		submitTestOrder(controller, "Apple", 5000L, "Buy");
-		submitTestOrder(controller, "ibm", 100L, "Buy");
-		submitTestOrder(controller, "Apple", 1000L, "Sell");
+		submitTestOrder(controller, "Apple", 5000L,170.43,"Buy");
+		submitTestOrder(controller, "ibm", 100L, 193.02, "Buy");
+		submitTestOrder(controller, "Apple", 1000L, 175.89,"Sell");
 	}
 
-	private void submitTestOrder(BotloggerController controller, String stock, Long qty, String direction) {
+	private void submitTestOrder(BotloggerController controller, String stock, Long qty, double price, String direction) {
 		OrderState order = new OrderState();
 		order.setCompleted(true);
 		order.setDirection(direction);
 		order.setQty(qty);
+		order.setPrice(price);
 		order.setStock(stock);
 		OrderLogEntry logEntry = new OrderLogEntry();
 		logEntry.setLastUserMessage("I want to do something");
