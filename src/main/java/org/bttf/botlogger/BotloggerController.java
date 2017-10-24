@@ -1,17 +1,16 @@
 package org.bttf.botlogger;
 
-import jdk.nashorn.internal.ir.debug.JSONWriter;
 import org.bttf.botlogger.model.OrderLogEntry;
 import org.bttf.botlogger.model.OrderState;
 import org.bttf.botlogger.util.OrderUtil;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.factory.Lists;
+import org.eclipse.collections.impl.factory.Maps;
+import org.eclipse.collections.impl.utility.Iterate;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Array;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,50 +54,24 @@ public class BotloggerController {
         return completedOrders;
     }
 
-   /* @GetMapping("/stock/holding")
-    @ResponseBody
-    @CrossOrigin
-    public Long getHoldingForStock(@RequestBody String stock) {
-        MutableList<OrderState> filledOrders = Lists.mutable.ofAll(completedOrders);
-        String stock2 = stock.substring(1,stock.length()-1).toLowerCase();
-
-        return filledOrders
-                .asLazy()
-                .select(o->o.getStock().toLowerCase().equals(stock2))
-                .collectLong(OrderUtil::getQtyWithDirection)
-                .sum();
-    }*/
-
     @GetMapping("/stock/holding")
     @ResponseBody
     @CrossOrigin
-    public Map<String, String> getHoldingForStock(@RequestBody String stock) {
-        MutableList<OrderState> filledOrders = Lists.mutable.ofAll(completedOrders);
-        String stock2 = stock.substring(1,stock.length()-1).toLowerCase();
-        Map<String,String> values = new HashMap<String,String>();
+    public Map<String, String> getHoldingForStock(@RequestParam String stock) {
 
-        long noOfOrders = 0;
-        long qty = 0;
-        double accumlativePrice = 0.0;
-        for (OrderState o: filledOrders){
-            if(o.stock.equalsIgnoreCase(stock2)){
-                noOfOrders++;
-                qty = qty + OrderUtil.getQtyWithDirection(o);
-                accumlativePrice = accumlativePrice + OrderUtil.getPrice(o);
-            }
+        MutableList<OrderState> filteredOrders = Iterate.select(completedOrders,
+                o -> o.getStock().equalsIgnoreCase(stock), Lists.mutable.of());
+
+        if (filteredOrders.isEmpty()){
+            return Maps.mutable.of();
         }
-
-        if (noOfOrders == 0){
-            return values;
-        }
-
-        double avgPrice = accumlativePrice / noOfOrders;
-        double totalPrice = qty * avgPrice;
-
-        values.put("qty",Long.toString(qty));
-        values.put("avgPrice", Double.toString(avgPrice));
-        values.put("totalPrice", Double.toString(totalPrice));
-        return values;
+        long totalQty = filteredOrders.collectLong(OrderUtil::getQtyWithDirection).sum();
+        long totalVolume = filteredOrders.collectLong(OrderState::getQty).sum();
+        double totalCost = filteredOrders.collectDouble((o)->o.getQty()*o.getPrice()).sum();
+        double avgPrice = totalVolume==0?0:totalCost/totalVolume;
+        return Maps.mutable.of(
+                "qty", ""+totalQty,
+                "avgPrice", ""+avgPrice);
     }
 
     @GetMapping("/holdings")
@@ -133,9 +106,6 @@ public class BotloggerController {
     }
 
     private void handleCompletedOrder(OrderLogEntry orderLogEntry) {
-//        Double price = (new Random().nextDouble() + 0.1) * 100d;
-//        OrderState completedOrder = orderLogEntry.getLastOrderState();
-//        completedOrder.setPrice(price);
         completedOrders.add(orderLogEntry.getLastOrderState());
     }
 }

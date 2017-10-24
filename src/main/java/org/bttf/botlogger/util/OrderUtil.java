@@ -12,7 +12,4 @@ public class OrderUtil {
         return order.getDirection().toLowerCase().equals("sell")?-1L:1L;
     }
 
-    public static Double getPrice(OrderState order){
-        return order.getPrice();
-    }
 }
