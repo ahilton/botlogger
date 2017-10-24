@@ -20,4 +20,5 @@ public class OrderState {
     public String direction;
     public Boolean completed;
     public Double price;
+    public String timestamp;
 }
